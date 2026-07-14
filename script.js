@@ -546,3 +546,133 @@ themeBtn.addEventListener('click', () => {
 
 saveEventBtn.addEventListener('click', saveEvent);
 deleteEventBtn.addEventListener('click', deleteEvent);
+closePopupBtn.addEventListener('click', closePopup);
+
+newEventBtn.addEventListener('click', () => {
+    const today = new Date();
+    const todayString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    currentMonth = today.getMonth();
+    currentYear = today.getFullYear();
+    renderCalendar();
+    openPopup(todayString);
+});
+
+searchEvent.addEventListener('input', (e) => {
+    renderEventList(e.target.value);
+});
+
+// Month selector popup
+monthDisplay.addEventListener('click', () => {
+    monthGrid.innerHTML = '';
+    months.forEach((month, index) => {
+        const div = document.createElement('div');
+        div.innerText = month.substring(0, 3); 
+        div.className = index === currentMonth ? 'selector-item active' : 'selector-item';
+        div.addEventListener('click', () => {
+            currentMonth = index;
+            renderCalendar();
+            monthPopup.style.display = 'none';
+        });
+        monthGrid.appendChild(div);
+    });
+    monthPopup.style.display = 'flex';
+});
+
+function renderYearGrid() {
+    yearGrid.innerHTML = '';
+    for (let i = 0; i < 12; i++) {
+        let displayYear = yearRangeStart + i;
+        const div = document.createElement('div');
+        div.innerText = displayYear;
+        div.className = displayYear === currentYear ? 'selector-item active' : 'selector-item';
+        div.addEventListener('click', () => {
+            currentYear = displayYear;
+            renderCalendar();
+            yearPopup.style.display = 'none';
+        });
+        yearGrid.appendChild(div);
+    }
+}
+
+yearDisplay.addEventListener('click', () => {
+    yearRangeStart = currentYear - 4;
+    renderYearGrid();
+    yearPopup.style.display = 'flex';
+});
+
+prevYearRangeBtn.addEventListener('click', () => {
+    yearRangeStart -= 12;
+    renderYearGrid();
+});
+
+nextYearRangeBtn.addEventListener('click', () => {
+    yearRangeStart += 12;
+    renderYearGrid();
+});
+
+window.addEventListener('click', (e) => {
+    if (e.target === popup) closePopup();
+    if (e.target === categoryPopup) categoryPopup.style.display = 'none';
+    if (e.target === monthPopup) monthPopup.style.display = 'none';
+    if (e.target === yearPopup) yearPopup.style.display = 'none';
+});
+
+function scheduleMidnightUpdate() {
+    const now = new Date();
+    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+    const timeUntilMidnight = midnight.getTime() - now.getTime();
+    setTimeout(() => {
+        currentMonth = new Date().getMonth();
+        currentYear = new Date().getFullYear();
+        renderCalendar();
+        scheduleMidnightUpdate(); 
+    }, timeUntilMidnight);
+}
+
+// Print Calendar
+printBtn.addEventListener('click', () => {
+    try {
+        window.print();
+    } catch (e) {
+        showCustomAlert("Print Failed", "Use standard desktop web browser to trigger printing.", "work");
+    }
+});
+
+// Export ICS Safe Anti-Freeze
+exportICSBtn.addEventListener('click', () => {
+    try {
+        let icsContent = "BEGIN:VCALENDAR\nVERSION:2.0\n";
+        const sortedDates = Object.keys(events);
+        if (sortedDates.length === 0) {
+            showCustomAlert("Empty Export", "No events created to export!", "work");
+            return;
+        }
+
+        sortedDates.forEach(date => {
+            const event = events[date];
+            const dateStr = date.replace(/-/g, ''); 
+            icsContent += "BEGIN:VEVENT\n";
+            icsContent += `DTSTART:${dateStr}T090000\n`;
+            icsContent += `DTEND:${dateStr}T100000\n`;
+            icsContent += `SUMMARY:${event.title}\n`;
+            icsContent += `DESCRIPTION:${event.description || ''}\n`;
+            icsContent += "END:VEVENT\n";
+        });
+        icsContent += "END:VCALENDAR";
+        
+        const base64Data = btoa(unescape(encodeURIComponent(icsContent)));
+        const link = document.createElement('a');
+        link.href = 'data:text/calendar;charset=utf-8;base64,' + base64Data;
+        link.download = 'my_calendar_events.ics';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showCustomAlert("Exported!", "ICS file download complete.", "personal");
+    } catch (err) {
+        showCustomAlert("Export Failed", "Error exporting calendar content.", "work");
+    }
+});
+
+// Initialize the entire application logic!
+init();
