@@ -1,1 +1,179 @@
-<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>Calendar App</title><link rel='stylesheet' href='style.css'></head><body><div class='calendar-container'><div class='calendar-header'><button id='prev'>&#10094;</button><h2 id='monthYear'></h2><button id='next'>&#10095;</button></div><div class='weekdays'><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div><div id='calendar' class='days'></div></div><div id='popup' class='popup'><div class='popup-content'><h3 id='selectedDate'></h3><input id='eventInput' placeholder='Event title'><textarea id='eventDescription' placeholder='Description'></textarea><div><button id='saveEvent'>Save</button><button id='deleteEvent'>Delete</button><button id='closePopup'>Close</button></div></div></div><script src='script.js'></script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Calendar App</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app">
+    <header class="mobile-top-bar">
+        <button id="menuToggle" class="menu-toggle-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <div class="mobile-logo">
+            <i class="fa-solid fa-calendar-days"></i>
+            <span>My Calendar</span>
+        </div>
+        <button id="topNotifyBtn" class="top-notify-btn" title="Notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span id="bellBadge" class="bell-badge"></span>
+        </button>
+    </header>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="logo">
+            <i class="fa-solid fa-calendar-days"></i>
+            <h2>My Calendar</h2>
+        </div>
+
+        <button class="new-event" id="newEvent">
+            <i class="fa-solid fa-plus"></i> New Event
+        </button>
+
+        <div class="search-box">
+            <input type="text" id="searchEvent" placeholder="Search events...">
+        </div>
+
+        <div class="sidebar-actions">
+            <button class="action-btn" id="printCalendar" title="Print Calendar">
+                <i class="fa-solid fa-print"></i> Print PDF
+            </button>
+            <button class="action-btn" id="exportICS" title="Export to Google Calendar">
+                <i class="fa-solid fa-file-export"></i> Export ICS
+            </button>
+        </div>
+
+        <div class="event-list">
+            <h3>Upcoming Events</h3>
+            <ul id="eventList">
+                <li>No events yet.</li>
+            </ul>
+        </div>
+    </aside>
+
+    <main class="calendar">
+        <header class="calendar-header">
+            <div class="left">
+                <button id="prev">
+                    <i class="fa-solid fa-angle-left"></i>
+                </button>
+                <div class="month-year-container">
+                    <span id="monthDisplay" class="clickable-header"></span>
+                    <span id="yearDisplay" class="clickable-header"></span>
+                </div>
+                <button id="next">
+                    <i class="fa-solid fa-angle-right"></i>
+                </button>
+            </div>
+
+            <div class="right">
+                <button class="today-btn" id="todayBtn">Today</button>
+                <button class="theme-btn" id="themeBtn">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <section class="weekdays">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </section>
+
+        <section id="calendar" class="days"></section>
+    </main>
+</div>
+
+<div class="popup" id="popup">
+    <div class="popup-box">
+        <h2>Add Event</h2>
+        <p id="selectedDate"></p>
+        <input type="text" id="eventTitle" placeholder="Event Title">
+        <textarea id="eventDescription" placeholder="Description"></textarea>
+        
+        <div class="time-input-group">
+            <label for="eventTime"><i class="fa-regular fa-clock"></i> Select Event Time</label>
+            <input type="time" id="eventTime">
+        </div>
+
+        <div class="popup-flex-row">
+            <div class="popup-field">
+                <label>Category</label>
+                <div class="category-select-wrapper">
+                    <select id="eventCategory" class="popup-select"></select>
+                    <button id="manageCategoriesBtn" type="button" title="Add/Manage Categories">
+                        <i class="fa-solid fa-gear"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="popup-field">
+                <label>Repeat (Recurring)</label>
+                <select id="eventRepeat" class="popup-select">
+                    <option value="none">Once (No Repeat)</option>
+                    <option value="daily">Every Day</option>
+                    <option value="weekly">Every Week</option>
+                    <option value="monthly">Every Month</option>
+                    <option value="yearly">Every Year</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="popup-buttons">
+            <button id="saveEvent">Save</button>
+            <button id="deleteEvent">Delete</button>
+            <button id="closePopup">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" id="categoryPopup">
+    <div class="popup-box category-manager-box">
+        <h2>Manage Categories</h2>
+        <div class="category-add-form">
+            <input type="text" id="newCatName" placeholder="Category Name (e.g., Gym)">
+            <input type="color" id="newCatColor" value="#3b82f6" title="Choose color">
+            <button id="addCatBtn"><i class="fa-solid fa-plus"></i> Add</button>
+        </div>
+        <div class="category-list-container">
+            <ul id="customCategoryList"></ul>
+        </div>
+        <div class="popup-buttons">
+            <button id="closeCategoryPopup">Back to Event</button>
+        </div>
+    </div>
+</div>
+
+<div class="popup" id="monthPopup">
+    <div class="popup-box selector-box">
+        <h2>Select Month</h2>
+        <div class="selector-grid" id="monthGrid"></div>
+    </div>
+</div>
+
+<div class="popup" id="yearPopup">
+    <div class="popup-box selector-box">
+        <div class="year-header">
+            <button id="prevYearRange"><i class="fa-solid fa-angle-left"></i></button>
+            <h2>Select Year</h2>
+            <button id="nextYearRange"><i class="fa-solid fa-angle-right"></i></button>
+        </div>
+        <div class="selector-grid" id="yearGrid"></div>
+    </div>
+</div>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<script src="script.js"></script>
+</body>
+                      </html>
+                      
